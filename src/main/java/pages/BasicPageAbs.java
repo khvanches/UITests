@@ -18,12 +18,4 @@ public abstract class BasicPageAbs<T> {
     PageFactory.initElements(driver, this);
     waiter = new StandardWaiter(driver);
   }
-
-  protected WebElement findElement(By locator) {
-    return driver.findElement(locator);
-  }
-
-  protected List<WebElement> findElements(By locator) {
-    return driver.findElements(locator);
-  }
 }

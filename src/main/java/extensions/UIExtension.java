@@ -1,5 +1,6 @@
 package extensions;
 
+import annotations.BorderColor;
 import driver.DriverFactory;
 import listeners.BasicListener;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -10,6 +11,9 @@ import org.openqa.selenium.support.events.EventFiringDecorator;
 
 
 import java.lang.reflect.Field;
+import java.util.Optional;
+
+import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 
 public class UIExtension implements BeforeEachCallback, AfterEachCallback {
@@ -19,7 +23,9 @@ public class UIExtension implements BeforeEachCallback, AfterEachCallback {
   @Override
   public void beforeEach(ExtensionContext extensionContext) throws Exception {
     driver = new DriverFactory().getDriver();
-    driver = new EventFiringDecorator(new BasicListener(driver)).decorate(driver);
+    BasicListener listener = new BasicListener(driver);
+    listener.setColor(getBorderColor(extensionContext));
+    driver = new EventFiringDecorator(listener).decorate(driver);
     try {
       Field driverField = extensionContext.getTestClass().get().getDeclaredField("driver");
       driverField.setAccessible(true);
@@ -34,6 +40,15 @@ public class UIExtension implements BeforeEachCallback, AfterEachCallback {
     if(driver != null){
       driver.close();
       driver.quit();
+    }
+  }
+
+  private String getBorderColor(ExtensionContext extensionContext){
+    Optional<BorderColor> optional = findAnnotation(extensionContext.getTestClass(), BorderColor.class);
+    if (optional.isPresent()){
+      return optional.get().value();
+    } else {
+      return "red";
     }
   }
 }

@@ -7,11 +7,12 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import pages.CourseDetailsPage;
 
-import java.time.Duration;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static utils.DateParsing.getDateFromString;
 
 public class CourseCardList extends BasicComponentAbs<CourseCardList> {
@@ -65,12 +66,18 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   }
 
   public CourseDetailsPage clickOnCard(){
+
     if (actualCourse != null) {
-       actualCourse.click();
+      String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
+      actualCourse.click();
+      assertThat (isExpectedCoursePageOpen(courseName))
+        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
+        courseName, getOpenedCourseName() ))
+        .isTrue();
       return new CourseDetailsPage(driver);
-    } else {
+          } else {
       try {
-        throw new Exception(String.format("Actual course wasn't chosen! It's possible to click on all courses!"));
+        throw new Exception("Actual course wasn't chosen! It's possible to click on all courses!");
       } catch (Exception ex) {
         ex.printStackTrace();
         return null;
@@ -79,25 +86,20 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   }
 
   public CourseDetailsPage actionsClickOnCard(){
-    return actionsClickOnCard("red");
-  }
-
-  public CourseDetailsPage actionsClickOnCard(String color){
 
     if (actualCourse != null) {
-        actions.moveToElement(actualCourse)
-          .clickAndHold()
-          .perform();
-        colorBorder(actualCourse, color);
-        actions.pause(2000)
-          .perform();
-        unColorBorder(actualCourse);
-        actions.release(actualCourse)
-          .perform();
+      String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
+      actions.moveToElement(actualCourse)
+        .perform();
+      actualCourse.click();
+      assertThat (isExpectedCoursePageOpen(courseName))
+        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
+          courseName, getOpenedCourseName() ))
+        .isTrue();
       return new CourseDetailsPage(driver);
     } else {
       try {
-        throw new Exception(String.format("Actual course wasn't chosen! It's possible to click on all courses!"));
+        throw new Exception("Actual course wasn't chosen! It's possible to click on all courses!");
       } catch (Exception ex) {
         ex.printStackTrace();
         return null;
@@ -105,21 +107,40 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     }
   }
 
-  private String getCourseName(WebElement webElement) {
-    return webElement.findElement(By.className(".lessons__new-item-title")).getText();
+  private Boolean isExpectedCoursePageOpen(String courseName) {
+    return getOpenedCourseName().contains(courseName);
   }
 
-  public Date getDate(WebElement webElement){
+  private String getCourseName(WebElement webElement) {
+    return webElement.findElement(By.className("lessons__new-item-title")).getText();
+  }
+
+  private String getOpenedCourseName(){
+    if(waiter.elementIsPresented(By.className("course-header2__title"))) {
+      return driver.findElement(By.className("course-header2__title")).getText();
+    } else if(waiter.elementIsPresented(By.cssSelector("[field='tn_text_1613574457579']"))) {
+      return driver.findElement(By.cssSelector("[field='tn_text_1613574457579']")).getText();
+    } else {
+      try {
+        throw new Exception("Course name hasn't been found on a page! Please, recheck page and elements");
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        return null;
+      }
+    }
+  }
+
+  private Date getDate(WebElement webElement){
     WebElement lessonStart;
     WebElement lessonTime;
 
-    if (isElementPresentInElement(webElement, By.className("lessons__new-item-start"))) {
+    if (isElementPresentedInElement(webElement, By.className("lessons__new-item-start"))) {
       lessonStart = webElement.findElement(By.className("lessons__new-item-start"));
     } else {
       lessonStart = null;
     }
 
-    if (isElementPresentInElement(webElement, By.className("lessons__new-item-time"))) {
+    if (isElementPresentedInElement(webElement, By.className("lessons__new-item-time"))) {
       lessonTime = webElement.findElement(By.className("lessons__new-item-time"));
     } else {
       lessonTime = null;
