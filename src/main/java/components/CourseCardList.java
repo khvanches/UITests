@@ -1,5 +1,8 @@
 package components;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static utils.DateParsing.getDateFromString;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -7,13 +10,9 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import pages.CourseDetailsPage;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static utils.DateParsing.getDateFromString;
 
 public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   private WebElement actualCourse;
@@ -29,8 +28,8 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
 
   public List<WebElement> filterByName(String filter){
     List<WebElement> result = courses.stream()
-      .filter(x -> getCourseName(x).contains(filter))
-      .collect(Collectors.toList());
+        .filter(x -> getCourseName(x).contains(filter))
+        .collect(Collectors.toList());
     if (!result.isEmpty()){
       return result;
     } else {
@@ -45,8 +44,8 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
 
   public WebElement filterByNameGetOne(String filter){
     return filterByName(filter).stream()
-      .findFirst()
-      .orElse(null);
+        .findFirst()
+        .orElse(null);
   }
 
   public CourseCardList getEarliest(){
@@ -70,12 +69,12 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     if (actualCourse != null) {
       String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
       actualCourse.click();
-      assertThat (isExpectedCoursePageOpen(courseName))
+      assertThat(isExpectedCoursePageOpen(courseName))
         .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
-        courseName, getOpenedCourseName() ))
+        courseName, getOpenedCourseName()))
         .isTrue();
       return new CourseDetailsPage(driver);
-          } else {
+    } else {
       try {
         throw new Exception("Actual course wasn't chosen! It's possible to click on all courses!");
       } catch (Exception ex) {
@@ -86,15 +85,14 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   }
 
   public CourseDetailsPage actionsClickOnCard(){
-
     if (actualCourse != null) {
       String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
       actions.moveToElement(actualCourse)
         .perform();
       actualCourse.click();
-      assertThat (isExpectedCoursePageOpen(courseName))
+      assertThat(isExpectedCoursePageOpen(courseName))
         .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
-          courseName, getOpenedCourseName() ))
+          courseName, getOpenedCourseName()))
         .isTrue();
       return new CourseDetailsPage(driver);
     } else {

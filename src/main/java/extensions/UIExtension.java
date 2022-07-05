@@ -1,5 +1,7 @@
 package extensions;
 
+import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
+
 import annotations.BorderColor;
 import driver.DriverFactory;
 import listeners.BasicListener;
@@ -9,12 +11,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 
-
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Optional;
-
-import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
-
 
 public class UIExtension implements BeforeEachCallback, AfterEachCallback {
 
@@ -26,14 +26,19 @@ public class UIExtension implements BeforeEachCallback, AfterEachCallback {
     BasicListener listener = new BasicListener(driver);
     listener.setColor(getBorderColor(extensionContext));
     driver = new EventFiringDecorator(listener).decorate(driver);
-    try {
-      Field driverField = extensionContext.getTestClass().get().getDeclaredField("driver");
-      driverField.setAccessible(true);
-      driverField.set(extensionContext.getTestInstance().get(), driver);
-      } catch (NoSuchFieldException ex) {
-        throw new Error("Something goes wrong with driver field");
+    AccessController.doPrivileged((PrivilegedAction<Void>)
+        () -> {
+        try {
+          Field driverField = extensionContext.getTestClass().get().getDeclaredField("driver");
+          driverField.setAccessible(true);
+          driverField.set(extensionContext.getTestInstance().get(), driver);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+          throw new Error("Something goes wrong with driver field");
+        }
+        return null;
       }
-    }
+    );
+  }
 
   @Override
   public void afterEach(ExtensionContext extensionContext) throws Exception {

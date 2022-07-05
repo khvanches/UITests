@@ -4,7 +4,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.openqa.selenium.WebDriver;
 
 public class MainPage extends BasicPageAbs<MainPage> {
-  private final String SITE_URL = StringUtils.stripEnd(System.getProperty("webdriver.base.url"), "/");
+  private final String site = StringUtils.stripEnd(System.getProperty("webdriver.base.url"), "/");
 
 
   public MainPage(WebDriver driver) {
@@ -12,6 +12,6 @@ public class MainPage extends BasicPageAbs<MainPage> {
   }
 
   public void open() {
-    driver.get(SITE_URL);
+    driver.get(site);
   }
 }
