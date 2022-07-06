@@ -9,7 +9,7 @@
     <version>1.0.0</version>
     <properties>
         <webdriver.manager.version>5.2.0</webdriver.manager.version>
-        <selenium.java.version>4.2.1</selenium.java.version>
+        <selenium.java.version>3.141.59</selenium.java.version>
         <org.junit.jupiter>5.8.1</org.junit.jupiter>
         <lombok.version>1.18.22</lombok.version>
         <assertj.version>3.23.1</assertj.version>

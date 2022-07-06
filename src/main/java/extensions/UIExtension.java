@@ -8,8 +8,7 @@ import listeners.BasicListener;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
@@ -18,14 +17,14 @@ import java.util.Optional;
 
 public class UIExtension implements BeforeEachCallback, AfterEachCallback {
 
-  private WebDriver driver = null;
+  private EventFiringWebDriver driver = null;
 
   @Override
-  public void beforeEach(ExtensionContext extensionContext) throws Exception {
+  public void beforeEach(ExtensionContext extensionContext){
     driver = new DriverFactory().getDriver();
-    BasicListener listener = new BasicListener(driver);
+    BasicListener listener = new BasicListener();
     listener.setColor(getBorderColor(extensionContext));
-    driver = new EventFiringDecorator(listener).decorate(driver);
+    driver.register(listener);
     AccessController.doPrivileged((PrivilegedAction<Void>)
         () -> {
         try {
@@ -41,7 +40,7 @@ public class UIExtension implements BeforeEachCallback, AfterEachCallback {
   }
 
   @Override
-  public void afterEach(ExtensionContext extensionContext) throws Exception {
+  public void afterEach(ExtensionContext extensionContext){
     if(driver != null){
       driver.quit();
     }
@@ -49,10 +48,6 @@ public class UIExtension implements BeforeEachCallback, AfterEachCallback {
 
   private String getBorderColor(ExtensionContext extensionContext){
     Optional<BorderColor> optional = findAnnotation(extensionContext.getTestClass(), BorderColor.class);
-    if (optional.isPresent()){
-      return optional.get().value();
-    } else {
-      return "red";
-    }
+    return optional.map(BorderColor::value).orElse("red");
   }
 }

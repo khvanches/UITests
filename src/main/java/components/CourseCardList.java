@@ -67,12 +67,12 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   public CourseDetailsPage clickOnCard(){
 
     if (actualCourse != null) {
-      String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
+      String courseName = getCourseName(actualCourse).replace("Специализация ", "");
       actualCourse.click();
 
       assertThat(isExpectedCoursePageOpen(courseName))
-        .as(String.format("Wrong course page has been opened! Course name on card: %s ",
-        courseName))
+        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
+          courseName, getOpenedCourseName()))
         .isTrue();
       return new CourseDetailsPage(driver);
     } else {

@@ -24,7 +24,7 @@ public class ChromeWebDriver implements IDriver {
 
     LoggingPreferences loggingPreference = new LoggingPreferences();
     loggingPreference.enable(LogType.PERFORMANCE, Level.INFO);
-    chromeOptions.setCapability(ChromeOptions.LOGGING_PREFS, loggingPreference);
+    chromeOptions.setCapability(CapabilityType.LOGGING_PREFS, loggingPreference);
 
     try {
       downloadLocalWebDriver(DriverManagerType.CHROME);
