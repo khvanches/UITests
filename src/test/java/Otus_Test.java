@@ -22,6 +22,7 @@ public class Otus_Test {
       .clickOnCard();
   }
 
+
   @Test
   public void actions_open_oldest_course_test() {
     MainPage mainPage = new MainPage(driver);

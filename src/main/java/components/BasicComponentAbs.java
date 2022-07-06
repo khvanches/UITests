@@ -3,6 +3,8 @@ package components;
 import org.openqa.selenium.*;
 import pages.BasicPageAbs;
 
+import java.util.function.BiFunction;
+
 public abstract class BasicComponentAbs<T> extends BasicPageAbs<T>  {
 
   public BasicComponentAbs(WebDriver driver) {
@@ -18,4 +20,9 @@ public abstract class BasicComponentAbs<T> extends BasicPageAbs<T>  {
       return false;
     }
   }
+
+  protected BiFunction<WebDriver, WebElement, T> scrollToElement = (WebDriver driver, WebElement element) -> {
+    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+    return (T) this;
+  };
 }

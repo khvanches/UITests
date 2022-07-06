@@ -69,9 +69,10 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     if (actualCourse != null) {
       String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
       actualCourse.click();
+
       assertThat(isExpectedCoursePageOpen(courseName))
-        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
-        courseName, getOpenedCourseName()))
+        .as(String.format("Wrong course page has been opened! Course name on card: %s ",
+        courseName))
         .isTrue();
       return new CourseDetailsPage(driver);
     } else {
@@ -86,8 +87,11 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
 
   public CourseDetailsPage actionsClickOnCard(){
     if (actualCourse != null) {
-      String courseName = getCourseName(actualCourse).replace("Специализация ", "");;
+      String courseName = getCourseName(actualCourse).replace("Специализация ", "");
+      scrollToElement.apply(driver, actualCourse);
       actions.moveToElement(actualCourse)
+        .pause(1000)
+        .build()
         .perform();
       actualCourse.click();
       assertThat(isExpectedCoursePageOpen(courseName))
@@ -114,10 +118,10 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   }
 
   private String getOpenedCourseName(){
-    if(waiter.elementIsPresented(By.className("course-header2__title"))) {
-      return driver.findElement(By.className("course-header2__title")).getText();
-    } else if(waiter.elementIsPresented(By.cssSelector("[field='tn_text_1613574457579']"))) {
+    if(waiter.elementIsPresented(By.cssSelector("[field='tn_text_1613574457579']"))) {
       return driver.findElement(By.cssSelector("[field='tn_text_1613574457579']")).getText();
+    } else if(waiter.elementIsPresented(By.className("course-header2__title"))) {
+      return driver.findElement(By.className("course-header2__title")).getText();
     } else {
       try {
         throw new Exception("Course name hasn't been found on a page! Please, recheck page and elements");
