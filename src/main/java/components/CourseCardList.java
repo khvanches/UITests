@@ -16,11 +16,9 @@ import java.util.stream.Collectors;
 
 public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   private WebElement actualCourse;
-  private Actions actions;
 
   public CourseCardList(WebDriver driver) {
     super(driver);
-    actions = new Actions(driver);
   }
 
   @FindBy(css = ".lessons__new-item")
@@ -68,6 +66,7 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
 
     if (actualCourse != null) {
       String courseName = getCourseName(actualCourse).replace("Специализация ", "");
+      scrollToElement.apply(driver, actualCourse);
       actualCourse.click();
 
       assertThat(isExpectedCoursePageOpen(courseName))
@@ -90,7 +89,6 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
       String courseName = getCourseName(actualCourse).replace("Специализация ", "");
       scrollToElement.apply(driver, actualCourse);
       actions.moveToElement(actualCourse)
-        .pause(1000)
         .build()
         .perform();
       actualCourse.click();
@@ -153,7 +151,7 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     } else {
       if (lessonTime != null) {
         String str = lessonTime.getText();
-        if (str.matches(".*\\d.*")) {
+        if (str.matches("^\\d.*")) {
           return getDateFromString(str);
         } else {
           return null;

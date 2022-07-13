@@ -1,8 +1,10 @@
 package utils;
 
+import static java.time.LocalDate.now;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,11 +38,12 @@ public class DateParsing {
   }
 
   private static String getYear(String s) {
-    int month = Calendar.getInstance().get(Calendar.MONTH);
+    LocalDate date = now();
+    int month = date.getMonthValue();
     if (Integer.parseInt(months.get(s)) < month) {
-      return Integer.toString(Calendar.getInstance().get(Calendar.YEAR) + 1);
+      return Integer.toString(date.getYear() + 1);
     } else {
-      return Integer.toString(Calendar.getInstance().get(Calendar.YEAR));
+      return Integer.toString(date.getYear());
     }
   }
 }
