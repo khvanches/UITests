@@ -1,30 +1,32 @@
 package pages;
 
 import annotations.URL;
-import org.openqa.selenium.WebDriver;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
+import utils.GuiceScoped;
 import waiters.StandardWaiter;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Logger;
 
 public abstract class BasicPageAbs<T> {
 
-  protected WebDriver driver;
+  protected GuiceScoped guiceScoped;
   protected StandardWaiter waiter;
   protected Actions actions;
 
-  public BasicPageAbs(WebDriver driver) {
-    this.driver = driver;
-    PageFactory.initElements(driver, this);
-    waiter = new StandardWaiter(driver);
-    actions = new Actions(driver);
+  protected final static Logger LOGGER = Logger.getLogger(BasicPageAbs.class.getName());
+  public BasicPageAbs(GuiceScoped guiceScoped) {
+    this.guiceScoped = guiceScoped;
+    PageFactory.initElements(guiceScoped.driver, this);
+    this.waiter = new StandardWaiter(guiceScoped.driver);
+    this.actions = new Actions(guiceScoped.driver);
   }
 
   public T open(){
-    driver.get(getBaseUrl() + getPageUrl());
+    guiceScoped.driver.get(getBaseUrl() + getPageUrl());
 
     return (T)page(getClass());
   }
@@ -36,16 +38,16 @@ public abstract class BasicPageAbs<T> {
   private String getPageUrl(){
     URL url = getClass().getAnnotation(URL.class);
     if (url != null) {
-      return url.value().replaceAll("/$","");
+      return url.value().replaceAll("/+$","");
     }
     return "";
   }
 
   private <T> T page(Class<T> clazz) {
     try{
-      Constructor constructor = clazz.getConstructor(WebDriver.class);
+      Constructor constructor = clazz.getConstructor(GuiceScoped.class);
 
-      return convertInstanceOfObject(constructor.newInstance(driver), clazz);
+      return convertInstanceOfObject(constructor.newInstance(guiceScoped), clazz);
     } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
       e.printStackTrace();
     }
@@ -59,5 +61,4 @@ public abstract class BasicPageAbs<T> {
       return null;
     }
   }
-
 }

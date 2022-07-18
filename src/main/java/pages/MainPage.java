@@ -1,13 +1,15 @@
 package pages;
 
 import annotations.URL;
-import org.codehaus.plexus.util.StringUtils;
+import com.google.inject.Inject;
 import org.openqa.selenium.WebDriver;
+import utils.GuiceScoped;
 
 @URL("/")
 public class MainPage extends BasicPageAbs<MainPage> {
-  public MainPage(WebDriver driver) {
-    super(driver);
+  @Inject
+  public MainPage(GuiceScoped guiceScoped) {
+    super(guiceScoped);
   }
 
 }

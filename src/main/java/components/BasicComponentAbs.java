@@ -2,13 +2,14 @@ package components;
 
 import org.openqa.selenium.*;
 import pages.BasicPageAbs;
+import utils.GuiceScoped;
 
 import java.util.function.BiFunction;
 
 public abstract class BasicComponentAbs<T> extends BasicPageAbs<T>  {
 
-  public BasicComponentAbs(WebDriver driver) {
-    super(driver);
+  public BasicComponentAbs(GuiceScoped guiceScoped) {
+    super(guiceScoped);
   }
 
   protected boolean isElementPresentedInElement(WebElement webElement, By by){

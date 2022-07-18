@@ -3,12 +3,14 @@ package components;
 import static org.assertj.core.api.Assertions.assertThat;
 import static utils.DateParsing.getDateFromString;
 
+import com.google.inject.Inject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import pages.CourseDetailsPage;
+import utils.GuiceScoped;
 
 import java.util.Date;
 import java.util.List;
@@ -16,9 +18,9 @@ import java.util.stream.Collectors;
 
 public class CourseCardList extends BasicComponentAbs<CourseCardList> {
   private WebElement actualCourse;
-
-  public CourseCardList(WebDriver driver) {
-    super(driver);
+  @Inject
+  public CourseCardList(GuiceScoped guiceScoped) {
+    super(guiceScoped);
   }
 
   @FindBy(css = ".lessons__new-item")
@@ -40,10 +42,11 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     }
   }
 
-  public WebElement filterByNameGetOne(String filter){
-    return filterByName(filter).stream()
+  public CourseCardList filterByNameGetOne(String filter){
+    actualCourse = filterByName(filter).stream()
         .findFirst()
         .orElse(null);
+    return this;
   }
 
   public CourseCardList getEarliest(){
@@ -62,18 +65,24 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
     return this;
   }
 
+  public CourseCardList getCourseStartAfterDate(Date date){
+    actualCourse = courses.stream()
+      .filter(x1 -> getDate(x1) != null)
+      .filter(x1 -> getDate(x1).after(date))
+      .findAny()
+      .orElse(null);
+    LOGGER.info(String.format("We have define the course that will start after/in expected date\n"
+        + "Course name: %s, \n"
+        + "Start date is: %s", getCourseName(actualCourse), getDate(actualCourse)));
+    return this;
+  }
+
   public CourseDetailsPage clickOnCard(){
 
     if (actualCourse != null) {
-      String courseName = getCourseName(actualCourse).replace("Специализация ", "");
-      scrollToElement.apply(driver, actualCourse);
+      scrollToElement.apply(guiceScoped.driver, actualCourse);
       actualCourse.click();
-
-      assertThat(isExpectedCoursePageOpen(courseName))
-        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
-          courseName, getOpenedCourseName()))
-        .isTrue();
-      return new CourseDetailsPage(driver);
+      return new CourseDetailsPage(guiceScoped);
     } else {
       try {
         throw new Exception("Actual course wasn't chosen! It's possible to click on all courses!");
@@ -82,53 +91,12 @@ public class CourseCardList extends BasicComponentAbs<CourseCardList> {
         return null;
       }
     }
-  }
-
-  public CourseDetailsPage actionsClickOnCard(){
-    if (actualCourse != null) {
-      String courseName = getCourseName(actualCourse).replace("Специализация ", "");
-      scrollToElement.apply(driver, actualCourse);
-      actions.moveToElement(actualCourse)
-        .build()
-        .perform();
-      actualCourse.click();
-      assertThat(isExpectedCoursePageOpen(courseName))
-        .as(String.format("Wrong course page has been opened! Course name on card: %s   Course name on page: %s",
-          courseName, getOpenedCourseName()))
-        .isTrue();
-      return new CourseDetailsPage(driver);
-    } else {
-      try {
-        throw new Exception("Actual course wasn't chosen! It's possible to click on all courses!");
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        return null;
-      }
-    }
-  }
-
-  private Boolean isExpectedCoursePageOpen(String courseName) {
-    return getOpenedCourseName().contains(courseName);
   }
 
   private String getCourseName(WebElement webElement) {
     return webElement.findElement(By.className("lessons__new-item-title")).getText();
   }
 
-  private String getOpenedCourseName(){
-    if(waiter.elementIsPresented(By.cssSelector("[field='tn_text_1613574457579']"))) {
-      return driver.findElement(By.cssSelector("[field='tn_text_1613574457579']")).getText();
-    } else if(waiter.elementIsPresented(By.className("course-header2__title"))) {
-      return driver.findElement(By.className("course-header2__title")).getText();
-    } else {
-      try {
-        throw new Exception("Course name hasn't been found on a page! Please, recheck page and elements");
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        return null;
-      }
-    }
-  }
 
   private Date getDate(WebElement webElement){
     WebElement lessonStart;
